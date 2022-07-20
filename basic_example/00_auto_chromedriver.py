@@ -6,6 +6,8 @@ Description: 현재 크롬 버전에 맞는 웹 드라이버 자동 다운로드
 # selenium lib
 from selenium import webdriver
 import chromedriver_autoinstaller
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
 import os
 import shutil
 import time
@@ -22,8 +24,15 @@ else:
     print(f"install the chrome driver(ver: {chrome_ver})")
     chromedriver_autoinstaller.install(True)
 
-# Get driver and open url
+# Get driver
 driver = webdriver.Chrome(driver_path)
+"""
+Get driver: DeprecationWarning: executable_path has been deprecated Warning 해결
+셀레니움 4버전부터 별도 크롬 웹 드라이버 없이 현재 운영체제에 설치된 크롬 브라우저 사용 설정 권장
+"""
+# driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+
+# open url
 driver.get("https://google.com")
 time.sleep(1)
 driver.quit()
