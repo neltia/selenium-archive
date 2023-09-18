@@ -1,1 +1,7 @@
+# private program
 private_program/
+test_program/
+
+# web browser driver
+geckodriver.exe
+geckodriver.log
