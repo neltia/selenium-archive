@@ -23,7 +23,8 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 driver.get('https://naver.com')
 
 # 2. 로그인 버튼 클릭
-elem = driver.find_element(By.CLASS_NAME, 'link_login')
+btn_class_name = 'MyView-module__link_login___HpHMW'
+elem = driver.find_element(By.CLASS_NAME, btn_class_name)
 elem.click()
 
 # 3. id, pw 입력
@@ -32,7 +33,7 @@ driver.find_element(By.ID, 'id').send_keys(user_id)
 driver.find_element(By.ID, 'pw').send_keys(user_pw)
 '''
 
-# 3. id 복사 붙여넣기
+# 3. id 입력
 elem_id = driver.find_element(By.ID, 'id')
 elem_id.click()
 pyperclip.copy(user_id)
