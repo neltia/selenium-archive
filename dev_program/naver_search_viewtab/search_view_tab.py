@@ -53,11 +53,13 @@ def search_url_data(keyword, end_data_num):
     # 각 블로그 URL을 가져옴
     page_html = driver.page_source
     soup = BeautifulSoup(page_html, "lxml")
-    search_result_list = soup.find_all("div", attrs={"class": "total_wrap api_ani_send"})
+    # link_class_name = "total_wrap api_ani_send"  (23.10.24 이전 네이버 뷰 탭 검색 목록 CLASS 이름)
+    link_class_name = "title_area"
+    search_result_list = soup.find_all("div", attrs={"class": link_class_name})
 
     for search_result in search_result_list:
         # HTML에서 링크 값에 해닫하는 href 속성을 가져옴
-        url_link = search_result.a["data-url"]
+        url_link = search_result.a["href"]
 
         # 링크를 리스트 변수에 추가
         url_list.append(url_link)
