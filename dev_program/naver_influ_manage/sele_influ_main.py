@@ -6,6 +6,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common import exceptions
+# parsing
+from bs4 import BeautifulSoup
+import re
 # etc
 from dotenv import load_dotenv
 import pyperclip
@@ -55,10 +58,45 @@ def naver_login(driver, user_id, user_pw):
 
 
 # 네이버 톡톡에서 안 읽음으로 처리된 목록 가져오기
-# * 읽음/안 읽음 처리된 톡톡을 선택 가능하게 설정
-# 네이버 톡톡 리스트에서 각 "맞팬"과 "https://in.naver.com" 링크 파싱
+# 네이버 톡톡 리스트에서 각 "https://in.naver.com" 링크 파싱
 def link_parsing_talktalk(driver, my_influencer_id):
     influencer_list = list()
+
+    talktalk_page = f"https://in.naver.com/{my_influencer_id}/talktalkList"
+    driver.get(talktalk_page)
+
+    # 안 읽음 처리된 톡톡 탭 메뉴 선택
+    unread_btn_xpath = "/html/body/div/div[1]/div/div[2]/div[2]/div[1]/button[2]"
+    try:
+        unread_btn_xpath = driver.find_element(By.XPATH, unread_btn_xpath)
+    except exceptions.NoSuchElementException:
+        msg = "본인의 인플루언서 아이디를 입력해주세요. 접근 권한이 없습니다."
+        print(msg)
+        return influencer_list
+
+    # 스크롤을 끝까지 내려서 페이지 데이터를 불러옴
+    body = driver.find_element(By.CSS_SELECTOR, "body")
+    idx = 5
+    for _ in range(idx):
+        body.send_keys(Keys.PAGE_DOWN)
+        time.sleep(1)
+
+    # 톡톡 리스트에서 "https://in.naver.com" 링크 파싱
+    page_html = driver.page_source
+    soup = BeautifulSoup(page_html, "lxml")
+    link_class_name = "TalkTalkList__ell___anpyL"
+    talktalk_list = soup.find_all("span", attrs={"class": link_class_name})
+
+    talktalk_data = ""
+    for idx in range(0, len(talktalk_list), 2):
+        # influencer_name = talktalk_list[idx].text
+        talktalk = talktalk_list[idx+1].text
+        talktalk_data += f"{talktalk}\n"
+
+    pat = r"(?:https:\/\/in\.naver\.com\/)(\w+)"
+    influencer_id_pat = re.compile(pat, re.MULTILINE)
+    influencer_list = influencer_id_pat.findall(talktalk_data)
+
     return influencer_list
 
 
@@ -73,7 +111,7 @@ def link_parsing_file():
 def get_influencer_list(driver, my_influencer_id, auto):
     # 자동으로 톡톡에 맞팬 요청을 신청하는 인플루언서에 한 해서,
     # 팬하기 요청을 수행하고 싶을 때
-    if auto:
+    if bool(auto):
         influencer_list = link_parsing_talktalk(driver, my_influencer_id)
         return influencer_list
 
@@ -145,16 +183,22 @@ def influencer_follow(driver, influencer_list):
 def main():
     # init
     load_dotenv(verbose=True)
+    user_id = os.environ.get("naver_id")
+    user_pw = os.environ.get("naver_pw")
+    list_auto = os.environ.get("list_auto")
+    my_influencer_id = os.environ.get("my_influencer_id")
+
+    # program start
+    print("--- 인플루언서 맞팬 관리 프로그램 ---")
+    print(f"{my_influencer_id}님의 팔로우 대상 목록 자동화: {list_auto}")
+
+    # driver setting
     driver = get_driver()
 
     # naver login
-    user_id = os.environ.get("naver_id")
-    user_pw = os.environ.get("naver_pw")
     naver_login(driver, user_id, user_pw)
 
     # in.naver.com list
-    my_influencer_id = os.environ.get("my_influencer_id")
-    list_auto = os.environ.get("list_auto")
     influencer_list = get_influencer_list(driver, my_influencer_id, list_auto)
 
     # follow repeat in list
