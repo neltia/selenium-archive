@@ -102,10 +102,14 @@ def data_parsing(url_list):
         # - 가져온 주소가 네이버 포스트인 경우
         elif url_link.startswith("https://post.naver.com"):
             content_css_selector = ".se_component_wrap.sect_dsc.__se_component_area"
-            content = driver.find_element(By.CSS_SELECTOR, content_css_selector)
-            text_data += content.text
-            chk_url_cnt += 1
-            continue
+            try:
+                content = driver.find_element(By.CSS_SELECTOR, content_css_selector)
+                text_data += content.text
+                chk_url_cnt += 1
+                continue
+            except exceptions.NoSuchElementException:
+                print("글 내용 확인 중 오류가 발생했습니다. 해당 글을 건너뜁니다.")
+                continue
 
         # css로 글 내용 가져와 저장
         # - 구버전 블로그 에디터
@@ -125,9 +129,9 @@ def data_parsing(url_list):
                 chk_url_cnt += 1
             except exceptions.NoSuchElementException:
                 if url_type == "cafe":
-                    print(f"{url_link} - 카페에 가입해야만 볼 수 있는 게시글입니다.")
+                    print("카페에 가입해야만 볼 수 있는 게시글입니다.")
                 else:
-                    print(f"{url_link} - 글 내용 확인 중 오류가 발생했습니다. 해당 글을 건너뜁니다.")
+                    print("글 내용 확인 중 오류가 발생했습니다. 해당 글을 건너뜁니다.")
                 continue
             text_data += content.text
 
