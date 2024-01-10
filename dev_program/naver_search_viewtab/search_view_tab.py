@@ -7,28 +7,28 @@ search_view_tab.py:
 * 연관 naver_search_bloghome/step6.py
 - 네이버 블로그 검색 창에서 키워드로 블로그 글 검색
 """
-# selenium lib
-# - selenium 라이브러리란?
-# -- 제가 블로그에 작성한 셀레니움 글 목록 읽기를 추천드립니다.
-# -- (https://blog.naver.com/dsz08082/222298630856)
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.common import exceptions
+# else python lib
+import time
+
+# graph
+import matplotlib.pyplot as plt
 from bs4 import BeautifulSoup
 # konlpy
 # - konlpy 개념: https://blog.naver.com/dsz08082/221556111946
 # - Twitter(Okt)로 한글 형태소 분석: https://blog.naver.com/dsz08082/222573153664
 from konlpy.tag import Okt
-from nltk import Text
-# graph
-import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
+from nltk import Text
+# selenium lib
+# - selenium 라이브러리란?
+# -- 제가 블로그에 작성한 셀레니움 글 목록 읽기를 추천드립니다.
+# -- (https://blog.naver.com/dsz08082/222298630856)
+from selenium import webdriver
+from selenium.common import exceptions
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 from wordcloud import WordCloud
-# else python lib
-import time
-
 
 # 셀레니움 웹 드라이버 설정
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -79,28 +79,29 @@ def data_parsing(url_list):
     chk_url_cnt = 0
 
     for url_link in url_list:
-        # url 분석 시작
-        print(f"{url_link} - carwling progress")
-
         # 게시글로 이동
         driver.get(url_link)
+        current_url = driver.current_url
+
+        # url 분석 시작
+        print(f"{current_url} - carwling progress")
 
         # iframe 태그를 사용해 HTML 태그가 분리되어 있어 바로 해당 내용을 가져올 수 없음
         # switch_to.frame()을 사용한 프레임 전환 필요
         # - 가져온 주소가 블로그 글인 경우
         # 2023년 기준 네이버 블로그의 메인 iframe 값은 mainFrame
-        if url_link.startswith("https://blog.naver.com"):
+        if current_url.startswith("https://blog.naver.com"):
             url_type = "blog"
             driver.switch_to.frame('mainFrame')
 
         # - 가져온 주소가 카페 글인 경우
         # 2023년 기준 네이버 카페의 메인 iframe 값은 cafe_main
-        elif url_link.startswith("https://cafe.naver.com"):
+        elif current_url.startswith("https://cafe.naver.com"):
             url_type = "cafe"
             driver.switch_to.frame('cafe_main')
 
         # - 가져온 주소가 네이버 포스트인 경우
-        elif url_link.startswith("https://post.naver.com"):
+        elif current_url.startswith("https://post.naver.com"):
             content_css_selector = ".se_component_wrap.sect_dsc.__se_component_area"
             try:
                 content = driver.find_element(By.CSS_SELECTOR, content_css_selector)
