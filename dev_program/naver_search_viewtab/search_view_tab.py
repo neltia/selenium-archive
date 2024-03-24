@@ -38,17 +38,17 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 def search_url_data(keyword, end_data_num):
     url_list = []
 
-    # 네이버 뷰 탭 전체 기준 검색 링크
-    search_link = f"https://search.naver.com/search.naver?where=view&sm=tab_jum&query={keyword}"
+    # 네이버 블로그 탭 전체 기준 검색 링크
+    search_link = f"https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query={keyword}"
 
     # - 페이지를 driver.get()으로 불러올 건데, 로딩 시간을 최대 2초까지 기다려줘
-    driver.implicitly_wait(2)
+    driver.implicitly_wait(3)
     # - 현재 검색 URL을 불러와줘
     driver.get(search_link)
 
     # 너무 빠르게 하면 크롤링 방지로 인해 오류가 생길 수 있으니
     # 다음 페이지로 넘어갈 때마다 대기 시간을 둠
-    time.sleep(0.5)
+    time.sleep(1)
 
     # 각 블로그 URL을 가져옴
     page_html = driver.page_source
@@ -185,7 +185,7 @@ def draw_graph(okt_parsing_text):
 
 def main():
     # - 검색할 단어
-    keyword = "네이버 카페"
+    keyword = "안산동"
     # - 그래프에 반영하는 수집할 최대 데이터 개수 (기본 최대 41개)
     end_data_num = 7
 
